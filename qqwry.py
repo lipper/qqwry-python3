@@ -44,6 +44,8 @@ class QQwry:
         self.index_count = -1
         
     def load_file(self, filename, loadindex=False):
+        self.clear()
+        
         # read file
         try:
             f = open(filename, 'br')
@@ -126,6 +128,9 @@ class QQwry:
             
     @functools.lru_cache(maxsize=128, typed=False)
     def lookup(self, ip_str):
+        if self.data == None:
+            return None
+        
         ip = sum(256**j*int(i) for j,i 
                   in enumerate(ip_str.strip().split('.')[::-1]))
         
