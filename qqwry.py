@@ -249,9 +249,9 @@ if __name__ == '__main__':
         q = QQwry()
         q.load_file(fn)
         
-        ipstr = sys.argv[1]
-        s = q.lookup(ipstr)
-        print(s)
+        for ipstr in sys.argv[1:]:
+            s = q.lookup(ipstr)
+            print(s)
     else:
         print('请以查询ip作为参数运行')
         
