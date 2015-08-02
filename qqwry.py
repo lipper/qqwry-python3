@@ -118,11 +118,9 @@ class QQwry:
         # province
         mode = struct.unpack_from('b', self.data, offset)[0]
         if mode == 2:
-            off1 = struct.unpack_from('<I', self.data, offset+1)[0]
-            off1 &= 0xFFFFFF
-            p = get_chars(self.data, off1)
-        else:
-            p = get_chars(self.data, offset)
+            offset = struct.unpack_from('<I', self.data, offset+1)[0]
+            offset &= 0xFFFFFF
+        p = get_chars(self.data, offset)
             
         return c, p
             
