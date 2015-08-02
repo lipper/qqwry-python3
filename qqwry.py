@@ -134,19 +134,16 @@ class QQwry:
             
     @functools.lru_cache(maxsize=128, typed=False)
     def lookup(self, ip_str):
-        if self.data == None:
-            return None
-        
         try:
             ip = sum(256**j*int(i) for j,i 
                       in enumerate(ip_str.strip().split('.')[::-1]))
+
+            if self.index == None:
+                r = self.raw_search(ip)
+            else:
+                r = self.index_search(ip)
         except:
             return None
-        
-        if self.index == None:
-            r = self.raw_search(ip)
-        else:
-            r = self.index_search(ip)
         
         return r
         
