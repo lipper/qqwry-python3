@@ -6,8 +6,9 @@
 # q.load_file(filename, loadindex=False)
 # q.lookup('8.8.8.8')
 #
-# 参数loadindex为False时，不加载索引，大约耗内存14MB
-# 参数loadindex为True时，加载索引，大约耗内存86MB，搜索性能稍快
+# 参数loadindex为False时，不加载索引，进程大约耗内存14MB
+# 参数loadindex为True时，加载索引，进程大约耗内存86MB，搜索性能稍快
+# 后者比前者搜索快近一倍（样本数据分别为9.49秒, 16.67秒）
 # 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
@@ -17,7 +18,6 @@
 # q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
 # 没有数据则返回None
 
-import struct
 import bisect
 import functools
 
@@ -33,6 +33,14 @@ class ip_fragment:
     
     def __lt__(self, other):
         return self.begin < other.begin
+    
+def int3(data, offset):
+    return data[offset] + (data[offset+1] << 8) + \
+           (data[offset+2] << 16)
+
+def int4(data, offset):
+    return data[offset] + (data[offset+1] << 8) + \
+           (data[offset+2] << 16) + (data[offset+3] << 24)
 
 class QQwry:
     def __init__(self):
@@ -51,13 +59,14 @@ class QQwry:
         # read file
         try:
             f = open(filename, 'br')
-            self.data = buffer = f.read() + b'fill'
+            self.data = buffer = f.read()
         except:
             print('qqwry.dat load failed')
             return False
         
         # index range
-        index_begin, index_end = struct.unpack_from('<II', buffer, 0)        
+        index_begin = int4(buffer, 0)
+        index_end = int4(buffer, 4)
         if (index_end - index_begin) % 7 != 0:
             print('qqwry.dat index error')
             return False
@@ -74,14 +83,11 @@ class QQwry:
         self.index = list()
         
         for i in range(self.index_count):
-            ip_begin = struct.unpack_from('<I', buffer, 
-                                    index_begin + i*7)[0]
-            offset = struct.unpack_from('<I', buffer,
-                                    index_begin + i*7 + 4)[0]
-            offset &= 0xffffff
+            ip_begin = int4(buffer, index_begin + i*7)
+            offset = int3(buffer, index_begin + i*7 + 4)
             
             # load ip_end
-            ip_end = struct.unpack_from('<I', buffer, offset)[0]
+            ip_end = int4(buffer, offset)
             
             f = ip_fragment(ip_begin, ip_end, offset+4)
             self.index.append(f)
@@ -105,14 +111,12 @@ class QQwry:
         # mode 0x01, full jump
         mode = self.data[offset]
         if mode == 1:
-            offset = struct.unpack_from('<I', self.data, offset+1)[0]
-            offset = offset & 0xFFFFFF
+            offset = int3(self.data, offset+1)
             mode = self.data[offset]
         
         # country
         if mode == 2:
-            off1 = struct.unpack_from('<I', self.data, offset+1)[0]
-            off1 &= 0xFFFFFF
+            off1 = int3(self.data, offset+1)
             c = get_chars(self.data, off1)
             offset += 4
         else:
@@ -122,8 +126,7 @@ class QQwry:
         # province
         mode = self.data[offset]
         if mode == 2:
-            offset = struct.unpack_from('<I', self.data, offset+1)[0]
-            offset &= 0xFFFFFF
+            offset = int3(self.data, offset+1)
         p = get_chars(self.data, offset)
         
         return c.decode('gb18030', errors='replace'), \
@@ -153,7 +156,7 @@ class QQwry:
 
         m = (l + r) // 2
         offset = self.index_begin + m * 7
-        new_ip = struct.unpack_from('<I', self.data, offset)[0]
+        new_ip = int4(self.data, offset)
 
         if ip < new_ip:
             return self.__raw_find(ip, l, m)
@@ -164,12 +167,11 @@ class QQwry:
         i = self.__raw_find(ip, 0, self.index_count)
         offset = self.index_begin + 7 * i
         
-        ip_begin = struct.unpack_from('<I', self.data, offset)[0]
+        ip_begin = int4(self.data, offset)
         
-        offset = struct.unpack_from('<I', self.data, offset+4)[0]
-        offset &= 0xFFFFFF
+        offset = int3(self.data, offset+4)
         
-        ip_end = struct.unpack_from('<I', self.data, offset)[0]
+        ip_end = int4(self.data, offset)
         
         if ip_begin <= ip <= ip_end:
             return self.__get_addr(offset+4)
@@ -205,8 +207,7 @@ class QQwry:
         if self.data == None or self.index_count == 0:
             return None
         
-        offset = struct.unpack_from('<I', self.data, self.index_end+4)[0]
-        offset &= 0xFFFFFF
+        offset = int3(self.data, self.index_end+4)
         
         return self.__get_addr(offset+4)
 
