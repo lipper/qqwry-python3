@@ -134,8 +134,11 @@ class QQwry:
         if self.data == None:
             return None
         
-        ip = sum(256**j*int(i) for j,i 
-                  in enumerate(ip_str.strip().split('.')[::-1]))
+        try:
+            ip = sum(256**j*int(i) for j,i 
+                      in enumerate(ip_str.strip().split('.')[::-1]))
+        except:
+            return None
         
         if self.index == None:
             r = self.raw_search(ip)
