@@ -1,12 +1,13 @@
-# for Python 3.2+
+# coding=utf-8
 #
+# for Python 3.2+
 # 用法：
 # q = QQwry()
 # q.load_file(filename, loadindex=False)
 # q.search('8.8.8.8')
 #
-# loadindex为False时，不加载索引，大约耗内存14MB
-# loadindex为True时，加载索引，大约耗内存86MB，搜索性能稍快
+# 参数loadindex为False时，不加载索引，大约耗内存14MB
+# 参数loadindex为True时，加载索引，大约耗内存86MB，搜索性能稍快
 # 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
