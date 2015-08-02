@@ -142,10 +142,9 @@ class QQwry:
                 r = self.raw_search(ip)
             else:
                 r = self.index_search(ip)
+            return r
         except:
             return None
-        
-        return r
         
     def __raw_find(self, ip, l, r):
         if r - l <= 1:
