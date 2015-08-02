@@ -103,11 +103,11 @@ class QQwry:
             return buffer[offset:offset+count]
         
         # mode 0x01, full jump
-        mode = struct.unpack_from('b', self.data, offset)[0]
+        mode = self.data[offset]
         if mode == 1:
             offset = struct.unpack_from('<I', self.data, offset+1)[0]
             offset = offset & 0xFFFFFF
-            mode = struct.unpack_from('b', self.data, offset)[0]
+            mode = self.data[offset]
         
         # country
         if mode == 2:
@@ -120,7 +120,7 @@ class QQwry:
             offset += len(c) + 1
 
         # province
-        mode = struct.unpack_from('b', self.data, offset)[0]
+        mode = self.data[offset]
         if mode == 2:
             offset = struct.unpack_from('<I', self.data, offset+1)[0]
             offset &= 0xFFFFFF
