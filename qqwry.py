@@ -4,16 +4,16 @@
 # 用法：
 # q = QQwry()
 # q.load_file(filename, loadindex=False)
-# q.search('8.8.8.8')
+# q.lookup('8.8.8.8')
 #
 # 参数loadindex为False时，不加载索引，大约耗内存14MB
 # 参数loadindex为True时，加载索引，大约耗内存86MB，搜索性能稍快
 # 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
-# search没有找到结果返回None，找到返回一个元组：('国家', '省份')
+# lookup没有找到结果返回None，找到返回一个元组：('国家', '省份')
 #
-# 使用@functools.lru_cache缓存128条最近查询的结果
+# 使用@functools.lru_cache缓存128条查询结果
 
 import struct
 import bisect
@@ -125,7 +125,7 @@ class QQwry:
         return c, p
             
     @functools.lru_cache(maxsize=128, typed=False)
-    def search(self, ip_str):
+    def lookup(self, ip_str):
         ip = sum(256**j*int(i) for j,i 
                   in enumerate(ip_str.strip().split('.')[::-1]))
         
@@ -221,8 +221,8 @@ def test():
     '''
     ips = [i.strip() for i in ips.split()]
     for ip in ips:
-        r1 = q1.search(ip)
-        r2 = q2.search(ip)
+        r1 = q1.lookup(ip)
+        r2 = q2.lookup(ip)
         print(ip, r1)
         if r1 != r2:
             print('errorrrrrrrrrrrrrrrrrrrrrrrrrr')
@@ -237,7 +237,7 @@ if __name__ == '__main__':
         q.load_file(fn)
         
         ipstr = sys.argv[1]
-        s = q.search(ipstr)
+        s = q.lookup(ipstr)
         print(s)
     else:
         print('请以查询ip作为参数运行')
