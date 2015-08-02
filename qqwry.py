@@ -10,7 +10,7 @@
 # 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
-# 没有找到结果返回None，找到返回一个元组：('国家', '省份')
+# search没有找到结果返回None，找到返回一个元组：('国家', '省份')
 #
 # 使用@functools.lru_cache缓存128条最近查询的结果
 
