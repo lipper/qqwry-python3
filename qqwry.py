@@ -6,9 +6,9 @@
 # q.load_file(filename, loadindex=False)
 # q.lookup('8.8.8.8')
 #
-# 参数loadindex为False时，不加载索引，进程大约耗内存14MB
-# 参数loadindex为True时，加载索引，进程大约耗内存86MB，搜索性能稍快
-# 后者比前者搜索快近一倍（样本数据分别为9.49秒, 16.67秒）
+# 参数loadindex为False时，不加载索引，进程耗内存13.2MB
+# 参数loadindex为True时，加载索引，进程耗内存91.3MB，搜索性能稍快
+# 后者比前者搜索快近一倍（样本数据分别为16.67秒, 9.49秒）
 # 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
