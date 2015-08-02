@@ -12,8 +12,10 @@
 # load_file成功返回True，失败返回False
 #
 # lookup没有找到结果返回None，找到返回一个元组：('国家', '省份')
+# lookup使用@functools.lru_cache缓存128条查询结果
 #
-# 使用@functools.lru_cache缓存128条查询结果
+# q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
+# 没有数据则返回None
 
 import struct
 import bisect
@@ -49,7 +51,7 @@ class QQwry:
         # read file
         try:
             f = open(filename, 'br')
-            self.data = buffer = f.read()
+            self.data = buffer = f.read() + b'fill'
         except:
             print('qqwry.dat load failed')
             return False
@@ -62,7 +64,7 @@ class QQwry:
         
         self.index_begin = index_begin
         self.index_end = index_end
-        self.index_count = (index_end - index_begin) // 7
+        self.index_count = (index_end - index_begin) // 7 + 1
         
         if not loadindex:
             print('qqwry.dat %s bytes.' %  format(len(buffer),','))
@@ -123,8 +125,8 @@ class QQwry:
             offset = struct.unpack_from('<I', self.data, offset+1)[0]
             offset &= 0xFFFFFF
         p = get_chars(self.data, offset)
-            
-        return c, p
+        
+        return c.decode('gb18030'), p.decode('gb18030')
             
     @functools.lru_cache(maxsize=128, typed=False)
     def lookup(self, ip_str):
@@ -139,10 +141,7 @@ class QQwry:
         else:
             r = self.index_search(ip)
         
-        if r == None:
-            return None
-
-        return r[0].decode('gb18030'), r[1].decode('gb18030')
+        return r
         
     def __raw_find(self, ip, l, r):
         if r - l <= 1:
@@ -158,7 +157,7 @@ class QQwry:
             return self.__raw_find(ip, m, r)
     
     def raw_search(self, ip):
-        i = self.__raw_find(ip, 0, self.index_count - 1)
+        i = self.__raw_find(ip, 0, self.index_count)
         offset = self.index_begin + 7 * i
         
         ip_begin = struct.unpack_from('<I', self.data, offset)[0]
@@ -176,7 +175,7 @@ class QQwry:
     def index_search(self, ip):
         sf = ip_fragment(ip)
         posi = bisect.bisect_left(self.index, sf)
-        if posi >= len(self.index):
+        if posi > len(self.index):
             return None
         
         result = None
@@ -197,6 +196,15 @@ class QQwry:
             return self.__get_addr(result.offset)
         else:
             return None
+        
+    def get_lastone(self):
+        if self.data == None or self.index_count == 0:
+            return None
+        
+        offset = struct.unpack_from('<I', self.data, self.index_end+4)[0]
+        offset &= 0xFFFFFF
+        
+        return self.__get_addr(offset+4)
         
 def test():
     fn = 'qqwry.dat'
