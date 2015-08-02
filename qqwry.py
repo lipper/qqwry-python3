@@ -219,7 +219,7 @@ if __name__ == '__main__':
         
         for ipstr in sys.argv[1:]:
             s = q.lookup(ipstr)
-            print(s)
+            print('%s\n%s' % (ipstr, s))
     else:
         print('请以查询ip作为参数运行')
         
