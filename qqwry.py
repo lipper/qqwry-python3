@@ -17,6 +17,9 @@
 #
 # q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
 # 没有数据则返回None
+#
+# q.clear() 清空已加载的qqwry.dat
+# 再次调用load_file时不必执行clear()
 
 import bisect
 import functools
