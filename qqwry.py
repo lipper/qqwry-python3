@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# for Python 3.2+
+# for Python 3.0+
 # 用法：
 # q = QQwry()
 # q.load_file(filename, loadindex=False)
@@ -13,7 +13,6 @@
 # load_file成功返回True，失败返回False
 #
 # lookup没有找到结果返回None，找到返回一个元组：('国家', '省份')
-# lookup使用@functools.lru_cache缓存128条查询结果
 #
 # q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
 # 没有数据则返回None
@@ -22,7 +21,6 @@
 # 再次调用load_file时不必执行clear()
 
 import bisect
-import functools
 
 __all__ = ('QQwry')
 
@@ -135,7 +133,6 @@ class QQwry:
         return c.decode('gb18030', errors='replace'), \
                p.decode('gb18030', errors='replace')
             
-    @functools.lru_cache(maxsize=128, typed=False)
     def lookup(self, ip_str):
         try:
             ip = sum(256**j*int(i) for j,i 
