@@ -202,12 +202,11 @@ class QQwry:
             return None
         
     def get_lastone(self):
-        if self.data == None or self.index_count == 0:
+        try:        
+            offset = int3(self.data, self.index_end+4)
+            return self.__get_addr(offset+4)
+        except:
             return None
-        
-        offset = int3(self.data, self.index_end+4)
-        
-        return self.__get_addr(offset+4)
 
 if __name__ == '__main__':
     import sys
