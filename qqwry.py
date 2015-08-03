@@ -62,14 +62,16 @@ class QQwry:
             f = open(filename, 'br')
             self.data = buffer = f.read()
         except:
-            print('qqwry.dat load failed')
+            print('%s load failed' % filename)
             return False
         
         # index range
         index_begin = int4(buffer, 0)
         index_end = int4(buffer, 4)
-        if (index_end - index_begin) % 7 != 0:
-            print('qqwry.dat index error')
+        if index_begin > index_end or \
+           (index_end - index_begin) % 7 != 0 or \
+           index_end >= len(buffer):
+            print('%s index error' % filename)
             return False
         
         self.index_begin = index_begin
@@ -77,8 +79,8 @@ class QQwry:
         self.index_count = (index_end - index_begin) // 7 + 1
         
         if not loadindex:
-            print('qqwry.dat %s bytes, %d fragments. without index.' %
-                  (format(len(buffer),','), self.index_count)
+            print('%s %s bytes, %d fragments. without index.' %
+                  (filename, format(len(buffer),','), self.index_count)
                  )
             return True
 
@@ -95,8 +97,8 @@ class QQwry:
             f = ip_fragment(ip_begin, ip_end, offset+4)
             self.index.append(f)
 
-        print('qqwry.dat %s bytes, %d fragments. with index.' % 
-              (format(len(buffer),','), len(self.index))
+        print('%s %s bytes, %d fragments. with index.' % 
+              (filename, format(len(buffer),','), len(self.index))
                )
         return True
         
