@@ -77,7 +77,9 @@ class QQwry:
         self.index_count = (index_end - index_begin) // 7 + 1
         
         if not loadindex:
-            print('qqwry.dat %s bytes.' %  format(len(buffer),','))
+            print('qqwry.dat %s bytes, %d fragments.' %  \
+                  (format(len(buffer),','), self.index_count)
+                 )
             return True
 
         # load index
@@ -139,10 +141,9 @@ class QQwry:
                       in enumerate(ip_str.strip().split('.')[::-1]))
 
             if self.index == None:
-                r = self.raw_search(ip)
+                return self.raw_search(ip)
             else:
-                r = self.index_search(ip)
-            return r
+                return self.index_search(ip)
         except:
             return None
         
