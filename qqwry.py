@@ -7,9 +7,9 @@
 # q.lookup('8.8.8.8')
 #
 # 参数loadindex为False时，不加载索引，进程耗内存13.2MB
-# 参数loadindex为True时，加载索引，进程耗内存91.3MB，搜索性能稍快
-# 后者比前者搜索快近一倍（样本数据分别为16.67秒, 9.49秒）
-# 以上是在Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
+# 参数loadindex为True时，加载索引，进程耗内存91.3MB
+# 后者比前者查找更快（2.8万次/秒，4.9万次/秒）
+# 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # load_file成功返回True，失败返回False
 #
 # lookup没有找到结果返回None，找到返回一个元组：('国家', '省份')
@@ -18,7 +18,7 @@
 # 没有数据则返回None
 #
 # q.clear() 清空已加载的qqwry.dat
-# 再次调用load_file时不必执行clear()
+# 再次调用load_file时不必执行q.clear()
 
 import bisect
 
@@ -58,10 +58,10 @@ class QQwry:
         self.clear()
         
         # read file
-        try:
-            f = open(filename, 'br')
+        with open(filename, 'br') as f:
             self.data = buffer = f.read()
-        except:
+        
+        if self.data == None:
             print('%s load failed' % filename)
             return False
         
