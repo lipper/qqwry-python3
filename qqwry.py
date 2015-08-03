@@ -127,8 +127,7 @@ class QQwry:
             offset += len(c) + 1
 
         # province
-        mode = self.data[offset]
-        if mode == 2:
+        if self.data[offset] == 2:
             offset = int3(self.data, offset+1)
         p = get_chars(self.data, offset)
         
