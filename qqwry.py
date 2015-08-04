@@ -17,6 +17,8 @@
 # q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
 # 没有数据则返回None
 #
+# q.is_loaded() 是否已加载数据，返回True或False
+#
 # q.clear() 清空已加载的qqwry.dat
 # 再次调用load_file时不必执行q.clear()
 
@@ -64,6 +66,12 @@ class QQwry:
         if self.data == None:
             print('%s load failed' % filename)
             return False
+        
+        if len(buffer) < 8:
+            print('%s load failed, file only %d bytes' % 
+                  (filename, len(buffer))
+                  )
+            return False            
         
         # index range
         index_begin = int4(buffer, 0)
@@ -164,11 +172,9 @@ class QQwry:
     def raw_search(self, ip):
         i = self.__raw_find(ip, 0, self.index_count)
         offset = self.index_begin + 7 * i
-        
         ip_begin = int4(self.data, offset)
         
         offset = int3(self.data, offset+4)
-        
         ip_end = int4(self.data, offset)
         
         if ip_begin <= ip <= ip_end:
@@ -201,8 +207,11 @@ class QQwry:
         else:
             return None
         
+    def is_loaded(self):
+        return self.index_begin != -1
+        
     def get_lastone(self):
-        try:        
+        try:
             offset = int3(self.data, self.index_end+4)
             return self.__get_addr(offset+4)
         except:
