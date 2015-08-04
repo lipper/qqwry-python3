@@ -6,20 +6,25 @@
 # q.load_file(filename, loadindex=False)
 # q.lookup('8.8.8.8')
 #
+# q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存13.2MB
 # 参数loadindex为True时，加载索引，进程耗内存91.3MB
 # 后者比前者查找更快（2.8万次/秒，4.9万次/秒）
 # 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
-# load_file成功返回True，失败返回False
+# 成功返回True，失败返回False
 #
-# lookup没有找到结果返回None，找到返回一个元组：('国家', '省份')
+# q.lookup('8.8.8.8')函数:
+# 没有找到结果返回None，找到返回一个元组：('国家', '省份')
 #
-# q.get_lastone() 返回最后一条数据，最后一条通常为数据版本号
+# q.get_lastone()函数:
+# 返回最后一条数据，最后一条通常为数据版本号
 # 没有数据则返回None
 #
-# q.is_loaded() 是否已加载数据，返回True或False
+# q.is_loaded()函数:
+# 是否已加载数据，返回True或False
 #
-# q.clear() 清空已加载的qqwry.dat
+# q.clear()函数:
+# 清空已加载的qqwry.dat
 # 再次调用load_file时不必执行q.clear()
 
 import bisect
