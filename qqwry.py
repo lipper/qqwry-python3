@@ -11,7 +11,7 @@
 # q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存13.2MB
 # 参数loadindex为True时，加载索引，进程耗内存18.8MB
-# 后者比前者查找更快（2.8万次/秒，6.9万次/秒）
+# 后者比前者查找更快（3.1万次/秒，6.9万次/秒）
 # 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # 成功返回True，失败返回False
 #
@@ -169,17 +169,16 @@ class QQwry:
             return None
         
     def __raw_find(self, ip, l, r):
-        if r - l <= 1:
-            return l
-
-        m = (l + r) // 2
-        offset = self.index_begin + m * 7
-        new_ip = int4(self.data, offset)
-
-        if ip < new_ip:
-            return self.__raw_find(ip, l, m)
-        else:
-            return self.__raw_find(ip, m, r)
+        while r - l > 1:
+            m = (l + r) // 2
+            offset = self.index_begin + m * 7
+            new_ip = int4(self.data, offset)
+    
+            if ip < new_ip:
+                r = m
+            else:
+                l = m
+        return l
     
     def raw_search(self, ip):
         i = self.__raw_find(ip, 0, self.index_count)
