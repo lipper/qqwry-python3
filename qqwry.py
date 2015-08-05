@@ -11,7 +11,7 @@
 # q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存13.2MB
 # 参数loadindex为True时，加载索引，进程耗内存18.8MB
-# 后者比前者查找更快（3.1万次/秒，6.9万次/秒），但加载文件稍慢
+# 后者比前者查找更快（3.1万次/秒，7.0万次/秒），但加载文件稍慢
 # 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # 成功返回True，失败返回False
 #
@@ -81,7 +81,7 @@ class QQwry:
         index_end = int4(buffer, 4)
         if index_begin > index_end or \
            (index_end - index_begin) % 7 != 0 or \
-           index_end >= len(buffer):
+           index_end + 7 > len(buffer):
             print('%s index error' % filename)
             self.clear()
             return False
@@ -116,6 +116,9 @@ class QQwry:
             print('%s load index error' % filename)
             self.clear()
             return False
+        
+        if self.index_end + 7 == len(buffer):
+            self.data = self.data[:self.index_begin]
 
         print('%s %s bytes, %d segments. with index.' % 
               (filename, format(len(buffer),','), len(self.idx1))
@@ -162,13 +165,16 @@ class QQwry:
                       in enumerate(ip_str.strip().split('.')[::-1]))
 
             if self.idx1 == None:
-                return self.raw_search(ip)
+                return self.__raw_search(ip)
             else:
-                return self.index_search(ip)
+                return self.__index_search(ip)
         except:
             return None
         
-    def __raw_find(self, ip, l, r):
+    def __raw_search(self, ip):
+        l = 0
+        r = self.index_count
+        
         while r - l > 1:
             m = (l + r) // 2
             offset = self.index_begin + m * 7
@@ -178,11 +184,8 @@ class QQwry:
                 r = m
             else:
                 l = m
-        return l
-    
-    def raw_search(self, ip):
-        i = self.__raw_find(ip, 0, self.index_count)
-        offset = self.index_begin + 7 * i
+        
+        offset = self.index_begin + 7 * l
         ip_begin = int4(self.data, offset)
         
         offset = int3(self.data, offset+4)
@@ -193,7 +196,7 @@ class QQwry:
         
         return None
     
-    def index_search(self, ip):
+    def __index_search(self, ip):
         posi = bisect.bisect_left(self.idx1, ip)
         
         result = -1
