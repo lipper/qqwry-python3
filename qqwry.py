@@ -96,16 +96,21 @@ class QQwry:
         self.idx2 = array.array('L')
         self.idxo = array.array('L')
         
-        for i in range(self.index_count):
-            ip_begin = int4(buffer, index_begin + i*7)
-            offset = int3(buffer, index_begin + i*7 + 4)
-            
-            # load ip_end
-            ip_end = int4(buffer, offset)
-            
-            self.idx1.append(ip_begin)
-            self.idx2.append(ip_end)
-            self.idxo.append(offset+4)
+        try:
+            for i in range(self.index_count):
+                ip_begin = int4(buffer, index_begin + i*7)
+                offset = int3(buffer, index_begin + i*7 + 4)
+                
+                # load ip_end
+                ip_end = int4(buffer, offset)
+                
+                self.idx1.append(ip_begin)
+                self.idx2.append(ip_end)
+                self.idxo.append(offset+4)
+        except:
+            self.clear()
+            print('%s load index error' % filename)
+            return False
 
         print('%s %s bytes, %d segments. with index.' % 
               (filename, format(len(buffer),','), len(self.idx1))
