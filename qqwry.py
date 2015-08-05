@@ -8,8 +8,8 @@
 #
 # q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存13.2MB
-# 参数loadindex为True时，加载索引，进程耗内存91.3MB
-# 后者比前者查找更快（2.8万次/秒，4.9万次/秒）
+# 参数loadindex为True时，加载索引，进程耗内存18.8MB
+# 后者比前者查找更快（2.8万次/秒，6.9万次/秒）
 # 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
 # 成功返回True，失败返回False
 #
@@ -28,20 +28,10 @@
 # 清空已加载的qqwry.dat
 # 再次调用load_file时不必执行q.clear()
 
+import array
 import bisect
 
 __all__ = ('QQwry')
-
-class ip_fragment:
-    __slots__ = ('begin', 'end', 'offset')
-    
-    def __init__(self, begin, end=0, offset=0):
-        self.begin = begin
-        self.end = end
-        self.offset = offset
-    
-    def __lt__(self, other):
-        return self.begin < other.begin
     
 def int3(data, offset):
     return data[offset] + (data[offset+1] << 8) + \
@@ -56,7 +46,10 @@ class QQwry:
         self.clear()
         
     def clear(self):
-        self.index = None
+        self.idx1 = None
+        self.idx2 = None
+        self.idxo = None
+        
         self.data = None
         self.index_begin = -1
         self.index_end = -1
@@ -93,13 +86,15 @@ class QQwry:
         self.index_count = (index_end - index_begin) // 7 + 1
         
         if not loadindex:
-            print('%s %s bytes, %d fragments. without index.' %
+            print('%s %s bytes, %d segments. without index.' %
                   (filename, format(len(buffer),','), self.index_count)
                  )
             return True
 
         # load index
-        self.index = list()
+        self.idx1 = array.array('L')
+        self.idx2 = array.array('L')
+        self.idxo = array.array('L')
         
         for i in range(self.index_count):
             ip_begin = int4(buffer, index_begin + i*7)
@@ -108,11 +103,12 @@ class QQwry:
             # load ip_end
             ip_end = int4(buffer, offset)
             
-            f = ip_fragment(ip_begin, ip_end, offset+4)
-            self.index.append(f)
+            self.idx1.append(ip_begin)
+            self.idx2.append(ip_end)
+            self.idxo.append(offset+4)
 
-        print('%s %s bytes, %d fragments. with index.' % 
-              (filename, format(len(buffer),','), len(self.index))
+        print('%s %s bytes, %d segments. with index.' % 
+              (filename, format(len(buffer),','), len(self.idx1))
                )
         return True
         
@@ -155,7 +151,7 @@ class QQwry:
             ip = sum(256**j*int(i) for j,i 
                       in enumerate(ip_str.strip().split('.')[::-1]))
 
-            if self.index == None:
+            if self.idx1 == None:
                 return self.raw_search(ip)
             else:
                 return self.index_search(ip)
@@ -189,27 +185,23 @@ class QQwry:
         return None
     
     def index_search(self, ip):
-        sf = ip_fragment(ip)
-        posi = bisect.bisect_left(self.index, sf)
-        if posi > len(self.index):
-            return None
+        posi = bisect.bisect_left(self.idx1, ip)
         
-        result = None
+        result = -1
         
         # previous fragement
         if posi > 0:
-            f = self.index[posi-1]
-            if f.begin <= ip <= f.end:
-                result = f
+            if self.idx1[posi-1] <= ip <= self.idx2[posi-1]:
+                result = posi - 1
     
         # ip == current.begin
-        if result == None and \
-           posi != len(self.index) and \
-           self.index[posi].begin == ip:
-            result = self.index[posi]
+        if result == -1 and \
+           posi != len(self.idx1) and \
+           self.idx1[posi] == ip:
+            result = posi
         
-        if result != None:
-            return self.__get_addr(result.offset)
+        if result != -1:
+            return self.__get_addr(self.idxo[result])
         else:
             return None
         
