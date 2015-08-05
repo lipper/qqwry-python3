@@ -64,12 +64,14 @@ class QQwry:
         
         if self.data == None:
             print('%s load failed' % filename)
+            self.clear()
             return False
         
         if len(buffer) < 8:
             print('%s load failed, file only %d bytes' % 
                   (filename, len(buffer))
                   )
+            self.clear()
             return False            
         
         # index range
@@ -79,6 +81,7 @@ class QQwry:
            (index_end - index_begin) % 7 != 0 or \
            index_end >= len(buffer):
             print('%s index error' % filename)
+            self.clear()
             return False
         
         self.index_begin = index_begin
@@ -108,8 +111,8 @@ class QQwry:
                 self.idx2.append(ip_end)
                 self.idxo.append(offset+4)
         except:
-            self.clear()
             print('%s load index error' % filename)
+            self.clear()
             return False
 
         print('%s %s bytes, %d segments. with index.' % 
