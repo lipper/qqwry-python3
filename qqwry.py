@@ -1,6 +1,8 @@
 # coding=utf-8
 #
 # for Python 3.0+
+# 来自 https://github.com/animalize/qqwry-python3
+#
 # 用法：
 # q = QQwry()
 # q.load_file(filename, loadindex=False)
