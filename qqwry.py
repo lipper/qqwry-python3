@@ -116,9 +116,6 @@ class QQwry:
             print('%s load index error' % filename)
             self.clear()
             return False
-        
-        if self.index_end + 7 == len(buffer):
-            self.data = self.data[:self.index_begin]
 
         print('%s %s bytes, %d segments. with index.' % 
               (filename, format(len(buffer),','), len(self.idx1))
@@ -198,7 +195,6 @@ class QQwry:
     
     def __index_search(self, ip):
         posi = bisect.bisect_left(self.idx1, ip)
-        
         result = -1
         
         # previous fragement
