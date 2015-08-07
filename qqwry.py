@@ -196,23 +196,18 @@ class QQwry:
     
     def __index_search(self, ip):
         posi = bisect.bisect_left(self.idx1, ip)
-        result = -1
         
-        # previous fragement
-        if posi > 0:
-            if self.idx1[posi-1] <= ip <= self.idx2[posi-1]:
-                result = posi - 1
-    
-        # ip == current.begin
-        if result == -1 and \
-           posi != len(self.idx1) and \
-           self.idx1[posi] == ip:
+        # first, check previous segment
+        # second, check ip == current.begin
+        if posi > 0 and \
+           self.idx1[posi-1] <= ip <= self.idx2[posi-1]:
+            result = posi - 1
+        elif posi != len(self.idx1) and self.idx1[posi] == ip:
             result = posi
-        
-        if result != -1:
-            return self.__get_addr(self.idxo[result])
         else:
             return None
+        
+        return self.__get_addr(self.idxo[result])
         
     def is_loaded(self):
         return self.index_begin != -1
