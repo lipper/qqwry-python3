@@ -46,13 +46,13 @@ def updateQQwry(filename):
     
     fetcher = get_fetcher()
     
-    # copywrite.rar
+    # download copywrite.rar
     url = 'http://update.cz88.net/ip/copywrite.rar'
     data = fetcher(url)
     if not data:
         return -1
     
-    # extract infomation
+    # extract infomation from copywrite.rar
     if len(data) <= 24 or data[:4] != b'CZIP':
         return -2
     
@@ -61,7 +61,7 @@ def updateQQwry(filename):
     if unknown1 != 1:
         return -2
     
-    # qqwry.rar
+    # download qqwry.rar
     url = 'http://update.cz88.net/ip/qqwry.rar'
     data = fetcher(url)
     
@@ -78,11 +78,13 @@ def updateQQwry(filename):
         head[i] = data[i] ^ key
     data = head + data[0x200:]
     
+    # decompress
     try:
         data = zlib.decompress(data)
     except:
         return -5
 
+    # save to file
     try:
         with open(filename, 'wb') as f:
             f.write(data)
