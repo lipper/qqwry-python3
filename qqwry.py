@@ -4,6 +4,7 @@
 # 来自 https://github.com/animalize/qqwry-python3
 #
 # 用法：
+# from qqwry import QQwry
 # q = QQwry()
 # q.load_file(filename, loadindex=False)
 # q.lookup('8.8.8.8')
