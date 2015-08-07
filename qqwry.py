@@ -202,7 +202,7 @@ class QQwry:
         if posi > 0 and \
            self.idx1[posi-1] <= ip <= self.idx2[posi-1]:
             result = posi - 1
-        elif posi != len(self.idx1) and self.idx1[posi] == ip:
+        elif posi != self.index_count and self.idx1[posi] == ip:
             result = posi
         else:
             return None
