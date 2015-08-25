@@ -93,8 +93,14 @@ def updateQQwry(filename):
         return -6
 
 if __name__ == '__main__':
-    ret = updateQQwry('qqwry.dat')
-    if ret > 0:
-        print('成功更新qqwry.dat，%s字节' % format(ret, ','))
+    import sys
+    if len(sys.argv) > 1:
+        ret = updateQQwry(sys.argv[1])
+        if ret > 0:
+            print('成功更新到%s，%s字节' % 
+                  (sys.argv[1], format(ret, ','))
+                  )
+        else:
+            print('更新失败，错误代码：%d' % ret)
     else:
-        print('更新失败，错误代码：%d' % ret)
+        print('用法：以想要保存的文件名作参数。')
