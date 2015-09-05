@@ -2,6 +2,7 @@
 #
 # for Python 3.0+
 # 来自 https://github.com/animalize/qqwry-python3
+# 版本：2015-09-05
 #
 # 用法：
 # from qqwry import QQwry
@@ -10,10 +11,10 @@
 # q.lookup('8.8.8.8')
 #
 # q.load_file(filename, loadindex=False)函数:
-# 参数loadindex为False时，不加载索引，进程耗内存13.2MB，查找稍慢
-# 参数loadindex为True时，加载索引，进程耗内存18.8MB，查找稍快
-# 后者比前者查找更快（3.1万次/秒，7.0万次/秒），但加载文件稍慢
-# 以上是在i3 3.6GHz, Win10, Python 3.4 64bit，qqwry.dat 8.84MB时的数据
+# 参数loadindex为False时，不加载索引，进程耗内存12.6MB，查找稍慢
+# 参数loadindex为True时，加载索引，进程耗内存17.7MB，查找稍快
+# 后者比前者查找更快（3.9万次/秒，9.7万次/秒），但加载文件稍慢
+# 以上是在i3 3.6GHz, Win10, Python 3.5.0rc2 64bit，qqwry.dat 8.85MB时的数据
 # 成功返回True，失败返回False
 #
 # q.lookup('8.8.8.8')函数:
@@ -126,13 +127,8 @@ class QQwry:
     def __get_addr(self, offset):
         
         # get C null-terminated string
-        def get_chars(buffer, offset):
-            count = 0
-            maxposi = len(buffer) - offset
-            while count < maxposi and \
-                  buffer[offset+count] != 0:
-                count += 1
-            return buffer[offset:offset+count]
+        def get_chars(offset):
+            return self.data[offset:self.data.index(b'\x00', offset)]
         
         # mode 0x01, full jump
         mode = self.data[offset]
@@ -143,16 +139,16 @@ class QQwry:
         # country
         if mode == 2:
             off1 = int3(self.data, offset+1)
-            c = get_chars(self.data, off1)
+            c = get_chars(off1)
             offset += 4
         else:
-            c = get_chars(self.data, offset)
+            c = get_chars(offset)
             offset += len(c) + 1
 
         # province
         if self.data[offset] == 2:
             offset = int3(self.data, offset+1)
-        p = get_chars(self.data, offset)
+        p = get_chars(offset)
         
         return c.decode('gb18030', errors='replace'), \
                p.decode('gb18030', errors='replace')
