@@ -63,8 +63,12 @@ class QQwry:
         self.clear()
         
         # read file
-        with open(filename, 'br') as f:
-            self.data = buffer = f.read()
+        try:
+            with open(filename, 'br') as f:
+                self.data = buffer = f.read()
+        except Exception as e:
+            print('打开、读取文件时出错：', e)
+            return False
         
         if self.data == None:
             print('%s load failed' % filename)
