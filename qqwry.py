@@ -2,7 +2,7 @@
 #
 # for Python 3.0+
 # 来自 https://github.com/animalize/qqwry-python3
-# 版本：2015-09-05
+# 版本：2015-09-06
 #
 # 用法：
 # from qqwry import QQwry
@@ -13,7 +13,7 @@
 # q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存12.6MB，查找稍慢
 # 参数loadindex为True时，加载索引，进程耗内存17.7MB，查找稍快
-# 后者比前者查找更快（3.9万次/秒，9.7万次/秒），但加载文件稍慢
+# 后者比前者查找更快（4.0万次/秒，10.1万次/秒），但加载文件稍慢
 # 以上是在i3 3.6GHz, Win10, Python 3.5.0rc2 64bit，qqwry.dat 8.85MB时的数据
 # 成功返回True，失败返回False
 #
@@ -128,12 +128,7 @@ class QQwry:
                )
         return True
         
-    def __get_addr(self, offset):
-        
-        # get C null-terminated string
-        def get_chars(offset):
-            return self.data[offset:self.data.index(b'\x00', offset)]
-        
+    def __get_addr(self, offset):        
         # mode 0x01, full jump
         mode = self.data[offset]
         if mode == 1:
@@ -143,16 +138,16 @@ class QQwry:
         # country
         if mode == 2:
             off1 = int3(self.data, offset+1)
-            c = get_chars(off1)
+            c = self.data[off1:self.data.index(b'\x00', off1)]
             offset += 4
         else:
-            c = get_chars(offset)
+            c = self.data[offset:self.data.index(b'\x00', offset)]
             offset += len(c) + 1
 
         # province
         if self.data[offset] == 2:
             offset = int3(self.data, offset+1)
-        p = get_chars(offset)
+        p = self.data[offset:self.data.index(b'\x00', offset)]
         
         return c.decode('gb18030', errors='replace'), \
                p.decode('gb18030', errors='replace')
