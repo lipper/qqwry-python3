@@ -2,7 +2,7 @@
 #
 # for Python 3.0+
 # 来自 https://github.com/animalize/qqwry-python3
-# 版本：2015-09-06
+# 版本：2015-09-06a
 #
 # 用法：
 # from qqwry import QQwry
@@ -13,7 +13,7 @@
 # q.load_file(filename, loadindex=False)函数:
 # 参数loadindex为False时，不加载索引，进程耗内存12.6MB，查找稍慢
 # 参数loadindex为True时，加载索引，进程耗内存17.7MB，查找稍快
-# 后者比前者查找更快（4.0万次/秒，10.1万次/秒），但加载文件稍慢
+# 后者比前者查找更快（3.9万次/秒，10.2万次/秒），但加载文件稍慢
 # 以上是在i3 3.6GHz, Win10, Python 3.5.0rc2 64bit，qqwry.dat 8.85MB时的数据
 # 成功返回True，失败返回False
 #
@@ -59,6 +59,8 @@ class QQwry:
         self.index_end = -1
         self.index_count = -1
         
+        self.__fun = None
+        
     def load_file(self, filename, loadindex=False):
         self.clear()
         
@@ -100,6 +102,7 @@ class QQwry:
             print('%s %s bytes, %d segments. without index.' %
                   (filename, format(len(buffer),','), self.index_count)
                  )
+            self.__fun = self.__raw_search
             return True
 
         # load index
@@ -126,6 +129,7 @@ class QQwry:
         print('%s %s bytes, %d segments. with index.' % 
               (filename, format(len(buffer),','), len(self.idx1))
                )
+        self.__fun = self.__index_search
         return True
         
     def __get_addr(self, offset):        
@@ -156,11 +160,7 @@ class QQwry:
         try:
             ip = sum(256**j*int(i) for j,i 
                       in enumerate(ip_str.strip().split('.')[::-1]))
-
-            if self.idx1 == None:
-                return self.__raw_search(ip)
-            else:
-                return self.__index_search(ip)
+            return self.__fun(ip)
         except:
             return None
         
@@ -198,7 +198,7 @@ class QQwry:
             return None
         
     def is_loaded(self):
-        return self.index_begin != -1
+        return self.__fun != None
         
     def get_lastone(self):
         try:
